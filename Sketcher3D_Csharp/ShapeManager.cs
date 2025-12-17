@@ -5,10 +5,22 @@ namespace Sketcher3D_Csharp
 {
     public class ShapeManager
     {
-        private readonly List<Shape> _shapes = new List<Shape>();
-        public void AddShape(Shape s) => _shapes.Add(s);
-        public IReadOnlyList<Shape> GetShapes() => _shapes;
-        public void Clear() => _shapes.Clear();
-        public Shape GetLastShape() => _shapes.Count > 0 ? _shapes[_shapes.Count - 1] : null;
+        private readonly List<Shape> _shapes =
+            new List<Shape>();
+
+        public void Add(Shape shape)
+        {
+            _shapes.Add(shape);
+        }
+
+        public IReadOnlyList<Shape> Shapes
+        {
+            get { return _shapes; }
+        }
+
+        public void Clear()
+        {
+            _shapes.Clear();
+        }
     }
 }

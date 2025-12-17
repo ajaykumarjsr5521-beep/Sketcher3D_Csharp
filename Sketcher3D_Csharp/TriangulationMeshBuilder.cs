@@ -7,16 +7,19 @@ namespace Sketcher3D_Csharp
     {
         public static MeshGeometry3D ToMesh(Triangulation tri)
         {
-            var mesh = new MeshGeometry3D();
-            foreach (var p in tri.Points)
-                mesh.Positions.Add(new Point3D(p.X, p.Y, p.Z));
-            foreach (var t in tri.Triangles)
+            MeshGeometry3D mesh = new MeshGeometry3D();
+
+            foreach (Point p in tri.Points)
+                mesh.Positions.Add(
+                    new Point3D(p.X, p.Y, p.Z));
+
+            foreach (Triangle t in tri.Triangles)
             {
                 mesh.TriangleIndices.Add(t.M1);
                 mesh.TriangleIndices.Add(t.M2);
                 mesh.TriangleIndices.Add(t.M3);
             }
-            // normals optional in WPF; positions+indices are enough
+
             return mesh;
         }
     }

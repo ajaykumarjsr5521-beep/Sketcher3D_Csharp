@@ -1,26 +1,23 @@
-﻿using System;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 
 namespace Sketcher3D_Csharp
 {
     /// <summary>
-    /// Tiny input dialog helper for 1–3 numeric values.
-    /// Usage:
-    ///   double a; if (InputDialogs.AskOne("Title","Label", 10, out a)) { ... }
-    ///   double a,b; if (InputDialogs.AskTwo("Title","A",1,"B",2,out a,out b)) { ... }
-    ///   double a,b,c; if (InputDialogs.AskThree("Title","A",1,"B",2,"C",3,out a,out b,out c)) { ... }
+    /// Simple numeric input dialogs for 1–3 values.
+    /// Pure WPF, no external dependencies.
     /// </summary>
     public static class InputDialogs
     {
-        // ---- Public API ----------------------------------------------------
+        // ================= PUBLIC API =================
 
-        public static bool AskOne(string title, string label1, double def1,
+        public static bool AskOne(string title, string label,
+                                  double defaultValue,
                                   out double v1)
         {
             var dlg = BuildWindow(title);
-            var tb1 = AddRow(dlg, label1, def1);
+            var tb1 = AddRow(dlg, label, defaultValue);
 
             if (ShowAndValidate(dlg, tb1, out v1))
                 return true;
@@ -39,7 +36,7 @@ namespace Sketcher3D_Csharp
             var tb2 = AddRow(dlg, label2, def2);
 
             if (ShowAndValidate(dlg, tb1, out v1) &&
-                ShowAndValidateValue(tb2, out v2))
+                TryParse(tb2.Text, out v2))
                 return true;
 
             v1 = v2 = 0;
@@ -58,110 +55,119 @@ namespace Sketcher3D_Csharp
             var tb3 = AddRow(dlg, label3, def3);
 
             if (ShowAndValidate(dlg, tb1, out v1) &&
-                ShowAndValidateValue(tb2, out v2) &&
-                ShowAndValidateValue(tb3, out v3))
+                TryParse(tb2.Text, out v2) &&
+                TryParse(tb3.Text, out v3))
                 return true;
 
             v1 = v2 = v3 = 0;
             return false;
         }
 
-        // ---- Internals -----------------------------------------------------
+        // ================= INTERNALS =================
 
         private class DialogState
         {
             public Window Window;
             public Grid Grid;
-            public Button Ok;
-            public Button Cancel;
-            public int NextRow = 0;
+            public int Row;
         }
 
         private static DialogState BuildWindow(string title)
         {
-            var wnd = new Window
+            var window = new Window
             {
                 Title = title,
-                Width = 360,
-                Height = 220,
-                WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                Width = 320,
                 ResizeMode = ResizeMode.NoResize,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner,
                 SizeToContent = SizeToContent.Height,
                 Owner = Application.Current?.MainWindow
             };
 
             var grid = new Grid { Margin = new Thickness(12) };
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
-            var btnPanel = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right, Margin = new Thickness(0, 8, 0, 0) };
-            var ok = new Button { Content = "OK", MinWidth = 70, Margin = new Thickness(0, 0, 8, 0), IsDefault = true };
+            var btnPanel = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                HorizontalAlignment = HorizontalAlignment.Right,
+                Margin = new Thickness(0, 10, 0, 0)
+            };
+
+            var ok = new Button { Content = "OK", MinWidth = 70, IsDefault = true, Margin = new Thickness(0, 0, 8, 0) };
             var cancel = new Button { Content = "Cancel", MinWidth = 70, IsCancel = true };
+
+            ok.Click += (_, __) => window.DialogResult = true;
+            cancel.Click += (_, __) => window.DialogResult = false;
+
             btnPanel.Children.Add(ok);
             btnPanel.Children.Add(cancel);
 
-            var outer = new DockPanel();
+            var root = new DockPanel();
             DockPanel.SetDock(btnPanel, Dock.Bottom);
-            outer.Children.Add(btnPanel);
-            outer.Children.Add(grid);
 
-            wnd.Content = outer;
+            root.Children.Add(btnPanel);
+            root.Children.Add(grid);
 
-            ok.Click += (s, e) => wnd.DialogResult = true;
-            cancel.Click += (s, e) => wnd.DialogResult = false;
+            window.Content = root;
 
-            return new DialogState { Window = wnd, Grid = grid, Ok = ok, Cancel = cancel };
+            return new DialogState { Window = window, Grid = grid };
         }
 
-        private static TextBox AddRow(DialogState dlg, string label, double defVal)
+        private static TextBox AddRow(DialogState dlg, string label, double defaultValue)
         {
             dlg.Grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
-            var lb = new Label { Content = label + ":", Margin = new Thickness(0, 0, 8, 6), VerticalAlignment = VerticalAlignment.Center };
-            Grid.SetRow(lb, dlg.NextRow);
-            Grid.SetColumn(lb, 0);
-            dlg.Grid.Children.Add(lb);
+            var lbl = new Label
+            {
+                Content = label + ":",
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(0, 0, 8, 6)
+            };
 
             var tb = new TextBox
             {
-                Margin = new Thickness(0, 0, 0, 6),
-                Text = defVal.ToString(CultureInfo.InvariantCulture)
+                Text = defaultValue.ToString(CultureInfo.InvariantCulture),
+                Margin = new Thickness(0, 0, 0, 6)
             };
-            Grid.SetRow(tb, dlg.NextRow);
+
+            Grid.SetRow(lbl, dlg.Row);
+            Grid.SetColumn(lbl, 0);
+
+            Grid.SetRow(tb, dlg.Row);
             Grid.SetColumn(tb, 1);
+
+            dlg.Grid.Children.Add(lbl);
             dlg.Grid.Children.Add(tb);
 
-            dlg.NextRow++;
+            dlg.Row++;
             return tb;
         }
 
-        private static bool ShowAndValidate(DialogState dlg, TextBox firstBox, out double val1)
+        private static bool ShowAndValidate(DialogState dlg, TextBox firstBox, out double value)
         {
-            // focus first field
-            dlg.Window.Loaded += (s, e) =>
+            dlg.Window.Loaded += (_, __) =>
             {
                 firstBox.Focus();
                 firstBox.SelectAll();
             };
 
-            var res = dlg.Window.ShowDialog();
-            if (res != true)
+            if (dlg.Window.ShowDialog() != true)
             {
-                val1 = 0;
+                value = 0;
                 return false;
             }
-            return ShowAndValidateValue(firstBox, out val1);
+
+            return TryParse(firstBox.Text, out value);
         }
 
-        private static bool ShowAndValidateValue(TextBox tb, out double value)
+        private static bool TryParse(string text, out double value)
         {
-            // Try invariant (dot) first, then current culture.
-            if (!double.TryParse(tb.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out value))
-            {
-                if (!double.TryParse(tb.Text, NumberStyles.Float, CultureInfo.CurrentCulture, out value))
-                    return false;
-            }
-            return true;
+            return double.TryParse(text, NumberStyles.Float,
+                       CultureInfo.InvariantCulture, out value)
+                || double.TryParse(text, NumberStyles.Float,
+                       CultureInfo.CurrentCulture, out value);
         }
     }
 }

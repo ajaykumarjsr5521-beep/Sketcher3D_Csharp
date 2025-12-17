@@ -5,24 +5,42 @@ namespace Sketcher3D_Csharp
 {
     public static class ShapeCreator
     {
-        private static bool Pos(double v) => v > 0;
-
-        public static Cuboid CreateCuboid(string name, double l, double w, double h)
-        { if (!Pos(l) || !Pos(w) || !Pos(h)) throw new ArgumentException("Invalid Cuboid"); return new Cuboid(name, l, w, h); }
+        private static bool Pos(double v) { return v > 0; }
 
         public static Cube CreateCube(string name, double side)
-        { if (!Pos(side)) throw new ArgumentException("Invalid Cube"); return new Cube(name, side); }
+        {
+            if (!Pos(side)) throw new ArgumentException();
+            return new Cube(name, side);
+        }
 
-        public static Sphere CreateSphere(string name, double r)
-        { if (!Pos(r)) throw new ArgumentException("Invalid Sphere"); return new Sphere(name, r); }
+        public static Cuboid CreateCuboid(string name, double l, double w, double h)
+        {
+            if (!Pos(l) || !Pos(w) || !Pos(h)) throw new ArgumentException();
+            return new Cuboid(name, l, w, h);
+        }
 
         public static Cylinder CreateCylinder(string name, double r, double h)
-        { if (!Pos(r) || !Pos(h)) throw new ArgumentException("Invalid Cylinder"); return new Cylinder(name, r, h); }
+        {
+            if (!Pos(r) || !Pos(h)) throw new ArgumentException();
+            return new Cylinder(name, r, h);
+        }
 
         public static Cone CreateCone(string name, double r, double h)
-        { if (!Pos(r) || !Pos(h)) throw new ArgumentException("Invalid Cone"); return new Cone(name, r, h); }
+        {
+            if (!Pos(r) || !Pos(h)) throw new ArgumentException();
+            return new Cone(name, r, h);
+        }
 
-        public static Pyramid CreatePyramid(string name, double bl, double bw, double h)
-        { if (!Pos(bl) || !Pos(bw) || !Pos(h)) throw new ArgumentException("Invalid Pyramid"); return new Pyramid(name, bl, bw, h); }
+        public static Sphere CreateSphere(string name, double r)
+        {
+            if (!Pos(r)) throw new ArgumentException();
+            return new Sphere(name, r);
+        }
+
+        public static Pyramid CreatePyramid(string name, double l, double w, double h)
+        {
+            if (!Pos(l) || !Pos(w) || !Pos(h)) throw new ArgumentException();
+            return new Pyramid(name, l, w, h);
+        }
     }
 }
