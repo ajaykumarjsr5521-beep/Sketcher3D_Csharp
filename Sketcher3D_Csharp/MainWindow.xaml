@@ -1,41 +1,81 @@
-﻿<Window x:Class="Sketcher3D_Csharp.MainWindow"
+﻿<!--
+    Main application window for Sketcher3D
+    This window hosts:
+    - Menu (File operations)
+    - Toolbar (shape creation tools)
+    - 3D viewport (camera, lights, scene)
+-->
+<Window x:Class="Sketcher3D_Csharp.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Sketcher3D - Pure WPF"
         Width="1200"
         Height="720">
 
+    <!-- DockPanel allows stacking UI elements
+         Menu & Toolbar dock at top
+         Viewport3D fills remaining space -->
     <DockPanel>
 
-        <!-- MENU -->
+        <!-- ================= MENU BAR ================= -->
+        <!-- Provides application-level commands -->
         <Menu DockPanel.Dock="Top">
+
+            <!-- FILE MENU -->
             <MenuItem Header="File">
+
+                <!-- Clears scene and resets state -->
                 <MenuItem Header="New" Click="New_Click"/>
+
+                <!-- Saves geometry data to file -->
                 <MenuItem Header="Save" Click="Save_Click"/>
+
+                <!-- Clears all shapes from the viewport -->
                 <MenuItem Header="Clear" Click="Clear_Click"/>
+
+                <!-- Visual separator -->
                 <Separator/>
+
+                <!-- Exits the application -->
                 <MenuItem Header="Exit" Click="Exit_Click"/>
+
             </MenuItem>
         </Menu>
 
-        <!-- TOOLBAR -->
+        <!-- ================= TOOLBAR ================= -->
+        <!-- Quick-access buttons to create 3D shapes -->
         <ToolBar DockPanel.Dock="Top">
+
+            <!-- Creates a cube -->
             <Button Content="Cube" Click="Cube_Click"/>
+
+            <!-- Creates a cuboid -->
             <Button Content="Cuboid" Click="Cuboid_Click"/>
+
+            <!-- Creates a cylinder -->
             <Button Content="Cylinder" Click="Cylinder_Click"/>
+
+            <!-- Creates a cone -->
             <Button Content="Cone" Click="Cone_Click"/>
+
+            <!-- Creates a sphere -->
             <Button Content="Sphere" Click="Sphere_Click"/>
+
+            <!-- Creates a pyramid -->
             <Button Content="Pyramid" Click="Pyramid_Click"/>
+
         </ToolBar>
 
-        <!-- VIEWPORT -->
+        <!-- ================= 3D VIEWPORT ================= -->
+        <!-- Core rendering area where all 3D objects are displayed -->
         <Viewport3D x:Name="View"
                     MouseDown="View_MouseDown"
                     MouseMove="View_MouseMove"
                     MouseUp="View_MouseUp"
                     MouseWheel="View_MouseWheel">
 
-            <!-- CAMERA -->
+            <!-- ========== CAMERA SETUP ========== -->
+            <!-- Perspective camera simulates human eye -->
             <Viewport3D.Camera>
                 <PerspectiveCamera x:Name="Camera"
                                    Position="300,200,300"
@@ -44,18 +84,28 @@
                                    FieldOfView="45"/>
             </Viewport3D.Camera>
 
-            <!-- LIGHTS -->
+            <!-- ========== LIGHTING ========== -->
+            <!-- Lights affect how 3D objects are shaded -->
             <ModelVisual3D>
                 <ModelVisual3D.Content>
                     <Model3DGroup>
+
+                        <!-- Ambient light:
+                             Provides base illumination to avoid black areas -->
                         <AmbientLight Color="#404040"/>
+
+                        <!-- Directional light:
+                             Simulates sunlight coming from a fixed direction -->
                         <DirectionalLight Color="White"
                                           Direction="-1,-2,-3"/>
+
                     </Model3DGroup>
                 </ModelVisual3D.Content>
             </ModelVisual3D>
 
-            <!-- SCENE ROOT -->
+            <!-- ========== SCENE ROOT ========== -->
+            <!-- All dynamically created 3D models are added here -->
+            <!-- Transformations (rotate, pan) are applied at this level -->
             <ModelVisual3D x:Name="SceneRoot"/>
 
         </Viewport3D>
