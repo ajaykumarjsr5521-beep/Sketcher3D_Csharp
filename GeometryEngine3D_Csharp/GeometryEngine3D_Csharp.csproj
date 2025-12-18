@@ -46,7 +46,6 @@
     <Compile Include="Cuboid.cs" />
     <Compile Include="Cylinder.cs" />
     <Compile Include="MathConstants.cs" />
-    <Compile Include="GeometryEngine3D_Csharp.cs" />
     <Compile Include="Matrix.cs" />
     <Compile Include="Point.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
